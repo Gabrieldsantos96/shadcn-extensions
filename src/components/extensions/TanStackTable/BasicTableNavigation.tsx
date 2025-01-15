@@ -8,13 +8,13 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-interface TanStackBasicTablePaginationNavigationComponentProps<TData> {
+interface TableNavigationProps<TData> {
   table: Table<TData>;
 }
 
-export default function TanStackBasicTablePaginationNavigationComponent<TData>({
+export default function TableNavigation<TData>({
   table,
-}: TanStackBasicTablePaginationNavigationComponentProps<TData>) {
+}: TableNavigationProps<TData>) {
   return (
     <Pagination className="m-0 mt-2 md:mt-0 md:justify-end">
       <PaginationContent>

@@ -1,24 +1,19 @@
 "use client";
 
 import {
-  ColumnFilter,
   type ColumnDef,
   type ColumnFiltersState,
   type PaginationState,
-  type RowSelectionState,
-  type SortingState,
 } from "@tanstack/react-table";
 
-import React, { useMemo, useState } from "react";
+import React from "react";
 
-import useSearchParamsPagination from "@/hooks/useSearchParamsPagination";
-
-import TanStackBasicTablePaginationComponent from "@/components/extensions/TanStackTable/TanStackBasicTablePaginationComponent";
+import TablePagination from "@/components/extensions/TanStackTable/TablePagination";
 import useTanStackTable from "@/components/extensions/TanStackTable/useTanStackTable";
-import { useDebounce } from "use-debounce";
+
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useExampleFetchData } from "./useExampleFetchData";
+import { useTableState } from "@/components/extensions/TanStackTable/useTableState";
 
 type IGenericExample = {
   id: string;
@@ -30,25 +25,7 @@ export default function Example1(props: {
   initialColumnFilters: ColumnFiltersState;
   initialPaginationState: PaginationState;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-    props.initialColumnFilters
-  );
-  const debouncedValue = useDebounce<ColumnFilter[]>(columnFilters, 1000);
-
-  const [p, setPagination] = useState<PaginationState>(
-    props.initialPaginationState
-  );
-
-  const pagination = useMemo(
-    () => ({
-      pageIndex: p.pageIndex + 1,
-      pageSize: p.pageSize,
-    }),
-    [p]
-  );
-  const cols: ColumnDef<IGenericExample>[] = [
+  const columns: ColumnDef<IGenericExample>[] = [
     {
       header: "STATUS",
       accessorKey: "status",
@@ -78,39 +55,38 @@ export default function Example1(props: {
     },
   ];
 
-  const allCols = cols.reduce<string[]>((acc, col: any) => {
-    acc.push(col.accessorKey);
-    return acc;
-  }, []);
-
-  useSearchParamsPagination({
+  const {
+    setColumnFilters,
     columnFilters,
     sorting,
-    allCols,
     pagination,
+    rowSelection,
+    setPagination,
+    setRowSelection,
+    setSorting,
+  } = useTableState({
+    columnFilters: props.initialColumnFilters,
+    pagination: props.initialPaginationState,
   });
 
   const { isLoading, data, isError, refetch } =
     useExampleFetchData<IGenericExample>({
-      sorting,
-      columnFilters: debouncedValue[0],
+      columnFilters,
       pagination,
+      sorting,
     });
 
   const { RootTable, table } = useTanStackTable<IGenericExample>({
-    columns: cols,
-    columnFilters,
     paginatedTableData: data,
-    rowSelection,
-    setRowSelection,
+    columns,
+    columnFilters,
+    sorting,
     pagination,
+    rowSelection,
+    setSorting,
     setColumnFilters,
     setPagination,
-    sorting,
-    setSorting,
-    columnVisibility: {
-      id: false,
-    },
+    setRowSelection,
   });
 
   return (
@@ -125,48 +101,18 @@ export default function Example1(props: {
       </div>
 
       <Card className="flex-1 p-4">
-        <div className="flex flex-col gap-y-2">
-          <HeaderFilters
-            headers={
-              table.getHeaderGroups()[0]?.headers as Record<string, any>[]
-            }
-          />
-        </div>
-
         <RootTable
           className="mb-4"
           isLoading={isLoading}
           isError={isError}
           refetch={refetch}
-          cols={cols}
+          cols={columns}
         />
 
-        {!isLoading && !!table.getRowModel().rows?.length && (
-          <TanStackBasicTablePaginationComponent table={table} />
+        {!!table.getRowModel().rows?.length && (
+          <TablePagination table={table} />
         )}
       </Card>
-    </div>
-  );
-}
-
-function HeaderFilters({ headers }: { headers: Record<any, any>[] }) {
-  const mapHeaders = headers.reduce((acc, header) => {
-    acc[header.id] = header;
-    return acc;
-  }, {} as Record<any, any>);
-  return (
-    <div className="mb-2 mt-5 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-      {mapHeaders.name && (
-        <div className="flex flex-col space-y-2">
-          <Input
-            placeholder={`Pesquisar...`}
-            value={(mapHeaders.name.column.getFilterValue() as string) || ""}
-            onChange={(e) => {
-              mapHeaders.name.column?.setFilterValue(e.target.value);
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

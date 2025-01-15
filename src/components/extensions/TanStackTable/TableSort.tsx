@@ -1,12 +1,10 @@
-import type { SortingState } from '@tanstack/react-table';
+import type { SortingState } from "@tanstack/react-table";
 
-interface TanStackBasicTableSortingComponentProps {
+interface TableSortProps {
   sorting: SortingState;
 }
 
-export default function TanStackBasicTableSortingComponent({
-  sorting,
-}: TanStackBasicTableSortingComponentProps) {
+export default function TableSort({ sorting }: TableSortProps) {
   return (
     <div className="rounded-xl bg-violet-300 p-4">
       <h1 className="text-2xl font-bold">Sorts</h1>

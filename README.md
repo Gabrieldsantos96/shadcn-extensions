@@ -1,195 +1,218 @@
-# TanStack Table: A Highly Customizable Table with Hook-based Implementation
+# **TanStack Table Integration with State Management and Client-Side Data Fetching**
 
-## Overview
+## **Overview**
 
-This project demonstrates a powerful and flexible implementation of tables using the TanStack Table library. The approach leverages React hooks to encapsulate table logic, state management, and behavior in a reusable way. The core of this implementation is the `useTanStackTable` custom hook, which exports both the table instance and a preconfigured table component (`RootTable`).
-
-By using closures within the hook, the implementation keeps the logic modular and ensures a seamless flow between table configuration and UI rendering.
+This implementation leverages **TanStack Table**, **React Query**, and custom hooks to create a fully customizable, client-driven data table. The solution separates state management, table configuration, and data fetching into distinct layers, ensuring scalability and maintainability.
 
 ---
 
-## Features
+## **Features**
 
-- **Encapsulated Logic**: All table-related logic is encapsulated within the `useTanStackTable` hook.
-- **Dynamic Export**: Directly export a table-ready component (`RootTable`) along with the table instance.
-- **Sorting**: Multi-column sorting with manual sorting control.
-- **Filtering**: Debounced and customizable column filtering.
-- **Pagination**: Server-side pagination with adjustable page sizes.
-- **Row Selection**: Supports both single and multi-row selection.
-- **Dynamic Styling**: Conditional styling for rows and cells based on data.
+- **Centralized State Management**: Control sorting, pagination, filtering, and row selection using `useTableState`.
+- **Client-Side Integration**: Seamlessly fetch, paginate, and filter data with `useExampleFetchData`.
+- **Reusable Table Logic**: Configure and render the table using `useTanStackTable`.
+- **Customizable Components**: Export the `table` instance for advanced customization and direct API access.
+- **Predefined Components**: Includes a `RootTable` and pagination components for quick integration.
 
 ---
 
-## Installation
+## **Components and Hooks**
 
-Install required dependencies:
+### **1. `useTableState`**
 
-```bash
-npm install @tanstack/react-table
-npm install react-query
-```
+A custom hook to manage table states using `useReducer`. This handles sorting, pagination, filtering, and row selection with dispatchable actions.
 
----
+#### **API**
 
-## Core Concept: The `useTanStackTable` Hook
+- **Input**: `initialState` (optional) - Partial state for initialization.
+- **Output**:
+  - Current states:
+    - `sorting`: Array of sorting configurations.
+    - `pagination`: Object with `pageIndex` and `pageSize`.
+    - `columnFilters`: Array of active column filters.
+    - `rowSelection`: Object representing selected rows.
+  - Dispatch functions:
+    - `setSorting`
+    - `setPagination`
+    - `setColumnFilters`
+    - `setRowSelection`
 
-The `useTanStackTable` hook centralizes all table functionality. It exports two main items:
-
-1. **`RootTable`**: A preconfigured table component ready for rendering.
-2. **`table`**: The TanStack Table instance, allowing additional customizations if needed.
-
-### Hook API
-
-| Parameter            | Type                                  | Description                             |
-| -------------------- | ------------------------------------- | --------------------------------------- |
-| `columns`            | `ColumnDef<TData, any>[]`             | Column definitions for the table.       |
-| `paginatedTableData` | `{ data: TData[]; ... }`              | Data and metadata for pagination.       |
-| `sorting`            | `SortingState`                        | Sorting state for the table.            |
-| `setSorting`         | `(state: SortingState) => void`       | Function to update sorting state.       |
-| `pagination`         | `PaginationState`                     | Current pagination state.               |
-| `setPagination`      | `(state: PaginationState) => void`    | Function to update pagination state.    |
-| `columnFilters`      | `ColumnFiltersState`                  | Active filters for the table.           |
-| `setColumnFilters`   | `(state: ColumnFiltersState) => void` | Function to update filters.             |
-| `rowSelection`       | `RowSelectionState`                   | State of selected rows.                 |
-| `setRowSelection`    | `(state: RowSelectionState) => void`  | Function to update row selection state. |
-| `columnVisibility`   | `Record<string, boolean>`             | Visibility state for each column.       |
-
----
-
-## How It Works
-
-### Hook Usage
-
-The hook takes several state management functions (`setSorting`, `setPagination`, etc.) and integrates them into a centralized table instance. This instance is configured with sorting, filtering, pagination, and row selection logic. The table instance and a ready-to-use component are returned for immediate use.
-
-### Example:
+#### **Example Usage**
 
 ```tsx
-const { RootTable, table } = useTanStackTable({
-  columns: cols,
-  columnFilters,
-  paginatedTableData: data,
-  rowSelection,
-  setRowSelection,
-  pagination,
-  setColumnFilters,
-  setPagination,
+const {
   sorting,
   setSorting,
-  columnVisibility: {
-    id: false,
-  },
+  pagination,
+  setPagination,
+  columnFilters,
+  setColumnFilters,
+  rowSelection,
+  setRowSelection,
+} = useTableState({
+  pagination: { pageIndex: 0, pageSize: 10 },
+  columnFilters: [],
 });
 ```
 
-### Why Export the Table?
+---
 
+### **2. `useTanStackTable`**
+
+A custom hook that integrates TanStack Table's core logic with the state management from `useTableState` and client-side data from `useExampleFetchData`.
+
+#### **Props**
+
+- **`columns`**: Array of column definitions.
+- **`paginatedTableData`**: Client-side response containing:
+  - `data`: Array of rows.
+  - `total_filtered`: Total rows after filtering.
+  - `limit`: Page size.
+- **State and Dispatch**:
+  - `sorting`, `setSorting`
+  - `pagination`, `setPagination`
+  - `columnFilters`, `setColumnFilters`
+  - `rowSelection`, `setRowSelection`
+- **Optional**:
+  - `columnVisibility`: Object to dynamically control column visibility.
+
+#### **Example Usage**
+
+```tsx
+const { RootTable, table } = useTanStackTable({
+  columns,
+  paginatedTableData: data,
+  sorting,
+  setSorting,
+  pagination,
+  setPagination,
+  columnFilters,
+  setColumnFilters,
+  rowSelection,
+  setRowSelection,
+});
+```
+
+#### **Output**
+
+- **`table`**: TanStack Table instance for direct API access and advanced customizations.
+- **`RootTable`**: Preconfigured table component that accepts the following props:
+  - `isLoading`: Boolean indicating loading state.
+  - `isError`: Boolean indicating error state.
+  - `refetch`: Function to refetch data.
+  - `cols`: Column definitions.
+
+**Why Export `table`?**
 Exporting the `table` instance allows developers to:
 
-- Access advanced table configurations.
-- Apply additional customizations at runtime.
-- Debug or inspect table state dynamically.
+- Directly access TanStack Table APIs.
+- Create highly customizable components by extending the table logic.
+- Integrate the table into various layouts or UI libraries seamlessly.
 
 ---
 
-## Complete Usage Example
+### **3. `useExampleFetchData`**
+
+A React Query-based hook for fetching client-side data with sorting, filtering, and pagination.
+
+#### **Props**
+
+- **`columnFilters`**: Array of active filters.
+- **`pagination`**: Object with `pageIndex` and `pageSize`.
+- **`sorting`**: Array of sorting configurations.
+
+#### **Example Usage**
 
 ```tsx
-import {
-  ColumnFilter,
-  type ColumnDef,
-  type ColumnFiltersState,
-  type PaginationState,
-  type RowSelectionState,
-  type SortingState,
-} from "@tanstack/react-table";
-import React, { useMemo, useState } from "react";
+const { isLoading, data, isError, refetch } = useExampleFetchData({
+  columnFilters,
+  pagination,
+  sorting,
+});
+```
+
+#### **Output**
+
+- **`isLoading`**: Indicates if data is loading.
+- **`data`**: Fetched data from the client.
+- **`isError`**: Indicates if an error occurred.
+- **`refetch`**: Function to refetch data.
+
+---
+
+## **Complete Example**
+
+```tsx
+import React from "react";
+import { Card } from "@/components/ui/card";
+import TablePagination from "@/components/extensions/TanStackTable/TablePagination";
+import useTanStackTable from "@/components/extensions/TanStackTable/useTanStackTable";
+import { useTableState } from "@/components/extensions/TanStackTable/useTableState";
+import { useExampleFetchData } from "@/components/extensions/TanStackTable/useExampleFetchData";
 
 export default function ExampleTable() {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  const cols: ColumnDef<{ id: string; name: string; status: string }>[] = [
-    {
-      header: "ID",
-      accessorKey: "id",
-      enableSorting: true,
-    },
-    {
-      header: "Name",
-      accessorKey: "name",
-      enableSorting: true,
-    },
-    {
-      header: "Status",
-      accessorKey: "status",
-      enableSorting: false,
-    },
+  const columns = [
+    { header: "Name", accessorKey: "name" },
+    { header: "Status", accessorKey: "status" },
+    { header: "Type", accessorKey: "type" },
   ];
 
-  const data = useMemo(
-    () => [
-      { id: "1", name: "Item 1", status: "Active" },
-      { id: "2", name: "Item 2", status: "Inactive" },
-    ],
-    []
-  );
-
-  const { RootTable, table } = useTanStackTable({
-    columns: cols,
-    columnFilters,
-    paginatedTableData: { data, total: 2, limit: 10, total_filtered: 2 },
-    rowSelection,
-    setRowSelection,
-    pagination,
-    setColumnFilters,
-    setPagination,
+  const {
     sorting,
     setSorting,
-    columnVisibility: {
-      id: true,
-    },
+    pagination,
+    setPagination,
+    columnFilters,
+    setColumnFilters,
+    rowSelection,
+    setRowSelection,
+  } = useTableState({
+    pagination: { pageIndex: 0, pageSize: 10 },
+    columnFilters: [],
+  });
+
+  const { isLoading, data, isError, refetch } = useExampleFetchData({
+    columnFilters,
+    pagination,
+    sorting,
+  });
+
+  const { RootTable, table } = useTanStackTable({
+    columns,
+    paginatedTableData: data,
+    sorting,
+    setSorting,
+    pagination,
+    setPagination,
+    columnFilters,
+    setColumnFilters,
+    rowSelection,
+    setRowSelection,
   });
 
   return (
-    <div>
-      <div className="flex flex-col gap-y-2">
-        <HeaderFilters
-          headers={
-            table.getHeaderGroups()[0]?.headers as Record<string, any>[] // access to table props directly
-          }
-        />
-      </div>
-
+    <Card>
       <RootTable
-        isError={false}
-        isLoading={false}
-        refetch={() => {}}
-        cols={cols}
+        isLoading={isLoading}
+        isError={isError}
+        refetch={refetch}
+        cols={columns}
       />
-    </div>
+      {!!table.getRowModel().rows.length && <TablePagination table={table} />}
+    </Card>
   );
 }
 ```
 
 ---
 
-## Key Benefits of This Implementation
+## **Benefits**
 
-1. **Encapsulation**: Keeps table logic isolated from UI components.
-2. **Flexibility**: Offers direct access to both the table instance and a preconfigured component.
-3. **Customizability**: Makes it easy to modify table behavior, styles, and features as needed.
-
----
-
-## Conclusion
-
-The `useTanStackTable` hook simplifies table management by integrating logic and UI seamlessly. By leveraging closures and direct exports, this approach ensures a scalable, maintainable, and highly customizable solution for implementing tables in React applications.
+1. **Centralized State**: Easily manage all table-related states.
+2. **Customizable Table Instance**: Direct access to the `table` instance enables advanced customizations and API usage.
+3. **Client-Side Fetching**: Fetch and manipulate data directly from the client, supporting real-time updates.
+4. **Reusable Hooks**: Hooks are designed to be reused across different table setups.
+5. **Flexible Components**: Tailor columns, states, and hooks to fit your specific needs.
 
 # ComboSearchBox: A Dynamic and Async Searchable Dropdown Component
 
@@ -574,3 +597,178 @@ You can extend the `showDialog` function to add more customization options, such
 ## Conclusion
 
 The `DialogManager` offers a robust and flexible way to manage dialogs programmatically. By leveraging event-driven architecture and promises, it provides a clean and scalable solution for handling user interactions that require confirmation or additional input.
+
+# MaskedInput: A Flexible and Reusable Input Component with Masking
+
+## Overview
+
+The `MaskedInput` component provides a reusable solution for input fields with dynamic masking functionality. It supports both string-based and function-based masks, making it highly adaptable for various use cases such as phone numbers, dates, or custom formats.
+
+Key features include:
+
+- **Dynamic Masking**: Supports both static string masks and custom function-based masks.
+- **Controlled and Uncontrolled Usage**: Handles initial values and updates seamlessly.
+- **Callback Support**: Triggers a callback with the raw value stripped of formatting.
+- **Reusable Design**: Encapsulated logic for easy integration and reusability across different projects.
+
+---
+
+## Features
+
+1. **Flexible Masking**:
+   - Apply masks as strings or custom functions.
+   - Dynamically updates the mask as the user types.
+2. **Raw Value Handling**:
+   - Extracts and provides the raw, unformatted value through a callback (`onCallback`).
+3. **Initial Value Support**:
+   - Automatically formats and sets the initial value.
+4. **Customizable Styling**:
+   - Accepts additional class names for seamless styling.
+
+---
+
+## Installation
+
+Install the required dependencies:
+
+```bash
+npm install react
+```
+
+---
+
+## Props
+
+| Prop           | Type                      | Description                                                             |
+| -------------- | ------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `mask`         | `string                   | (value: string) => string`                                              | The mask to apply. Supports static string or dynamic function-based masks. |
+| `initialValue` | `string`                  | The initial value for the input field.                                  |
+| `onCallback`   | `(value: string) => void` | Callback triggered with the raw, unformatted value whenever it changes. |
+| `className`    | `string`                  | Additional CSS classes for styling the input field.                     |
+
+---
+
+## Usage Examples
+
+### Basic Usage with String Mask
+
+```tsx
+import React from "react";
+import { MaskedInput } from "@/components/ui/masked-input";
+
+export default function BasicExample() {
+  return (
+    <MaskedInput
+      mask="(###) ###-####"
+      onCallback={(value) => console.log("Raw value:", value)}
+    />
+  );
+}
+```
+
+### Using a Function-Based Mask
+
+```tsx
+import React from "react";
+import { MaskedInput } from "@/components/ui/masked-input";
+
+function customMask(value: string): string {
+  return value
+    .replace(/\D/g, "")
+    .replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+}
+
+export default function FunctionMaskExample() {
+  return (
+    <MaskedInput
+      mask={customMask}
+      onCallback={(value) => console.log("Raw value:", value)}
+    />
+  );
+}
+```
+
+### Initial Value Example
+
+```tsx
+import React from "react";
+import { MaskedInput } from "@/components/ui/masked-input";
+
+export default function InitialValueExample() {
+  return (
+    <MaskedInput
+      mask="#### #### #### ####"
+      initialValue="1234567812345678"
+      onCallback={(value) => console.log("Raw value:", value)}
+    />
+  );
+}
+```
+
+### Styling with `className`
+
+```tsx
+import React from "react";
+import { MaskedInput } from "@/components/ui/masked-input";
+
+export default function StyledExample() {
+  return (
+    <MaskedInput
+      mask="##/##/####"
+      className="border border-gray-300 p-2 rounded-md"
+      onCallback={(value) => console.log("Raw value:", value)}
+    />
+  );
+}
+```
+
+---
+
+## How It Works
+
+1. **Mask Application**:
+
+   - If `mask` is a string, the `applyMask` utility formats the input value.
+   - If `mask` is a function, it is called with the current value to determine the formatted output.
+
+2. **State Management**:
+
+   - The `value` state holds the formatted value.
+   - The `useEffect` hook ensures the initial value is formatted on mount.
+
+3. **Callback Execution**:
+   - When the value changes or the input loses focus, the raw value (digits only) is passed to the `onCallback` function.
+
+---
+
+## API Reference
+
+### `applyMask`
+
+Utility function that applies a string-based mask to a given value.
+
+```ts
+function applyMask(value: string, mask: string): string;
+```
+
+- **`value`**: The input value to format.
+- **`mask`**: The mask string (e.g., `###-###-####`).
+
+---
+
+## Benefits
+
+1. **Ease of Use**:
+   - Simple integration with flexible masking options.
+2. **Customizability**:
+   - Supports both standard and custom mask functions.
+3. **Performance**:
+   - Efficient state updates and controlled rendering.
+4. **Reusability**:
+   - Designed as a standalone component for diverse input scenarios.
+
+---
+
+## Conclusion
+
+The `MaskedInput` component simplifies the implementation of masked input fields in React. Its support for dynamic and custom masks, combined with features like initial value formatting and raw value callbacks, makes it a versatile tool for handling formatted inputs. Integrate it into your projects to enhance user input experience and maintain consistent data formatting.

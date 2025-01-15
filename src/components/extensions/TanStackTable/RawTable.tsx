@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface TanStackBasicTableTableComponentProps<TData> {
+type RawTableProps<TData> = {
   table: TableType<TData>;
   isLoading: boolean;
   isError: boolean;
@@ -27,9 +27,9 @@ interface TanStackBasicTableTableComponentProps<TData> {
   styleConditions?: Record<string, Record<string, TData>>;
   className?: string;
   cols: ColumnDef<TData>[];
-}
+};
 
-export default function TanStackBasicTableTableComponent<TData>({
+export default function RawTable<TData>({
   styleConditions = {},
   className,
   table,
@@ -37,7 +37,7 @@ export default function TanStackBasicTableTableComponent<TData>({
   isError,
   refetch,
   cols,
-}: TanStackBasicTableTableComponentProps<TData>) {
+}: RawTableProps<TData>) {
   const sortToggler = (header: Header<TData, unknown>) => {
     if (header.column.getCanSort()) {
       header.column.toggleSorting(undefined, true);

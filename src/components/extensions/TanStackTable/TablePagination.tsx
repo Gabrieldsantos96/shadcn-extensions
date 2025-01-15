@@ -1,4 +1,4 @@
-import type { Table } from '@tanstack/react-table';
+import type { Table } from "@tanstack/react-table";
 
 import {
   Select,
@@ -6,17 +6,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
-import TanStackBasicTablePaginationNavigationComponent from './TanStackBasicTablePaginationNavigationComponent';
+import TableNavigation from "./BasicTableNavigation";
 
-interface TanStackBasicTablePaginationComponentProps<TData> {
+interface TablePaginationProps<TData> {
   table: Table<TData>;
 }
 
-export default function TanStackBasicTablePaginationComponent<TData>({
+export default function TablePagination<TData>({
   table,
-}: TanStackBasicTablePaginationComponentProps<TData>) {
+}: TablePaginationProps<TData>) {
   return (
     <div className="flex flex-col md:flex-row">
       <div className="flex items-center justify-center gap-4">
@@ -45,7 +45,7 @@ export default function TanStackBasicTablePaginationComponent<TData>({
           } de ${table?.getPageCount()}`}
         </p>
       </div>
-      <TanStackBasicTablePaginationNavigationComponent table={table} />
+      <TableNavigation table={table} />
     </div>
   );
 }

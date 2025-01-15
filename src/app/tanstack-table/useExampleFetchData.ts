@@ -1,21 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type {
-  ColumnFilter,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
-import type { ReadonlyURLSearchParams } from "next/navigation";
-import { UseGetTableResponseType } from "../types/ITable";
-
-export type QuerySearchParams = {
-  pagination: PaginationState;
-  searchParams: ReadonlyURLSearchParams;
-  columnFilters: ColumnFilter[];
-  sorting: SortingState;
-  allCols: string[];
-};
-
-export type RqQueryHooks = Omit<QuerySearchParams, "searchParams" | "allCols">;
+import { RqQueryHooks, UseGetTableResponseType } from "../types/ITable";
 
 export const QUERY_KEY = "example";
 

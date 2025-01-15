@@ -3,8 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-import { QuerySearchParams } from "@/app/tanstack-table/useExampleFetchData";
 import { ColumnFilter } from "@tanstack/react-table";
+import {
+  UseSearchParamsProps,
+  UseUpdateSearchParamsProps,
+} from "@/app/types/ITable";
 
 export const updateQueryParams = ({
   pagination,
@@ -12,7 +15,7 @@ export const updateQueryParams = ({
   columnFilters,
   searchParams,
   sorting,
-}: QuerySearchParams) => {
+}: UseUpdateSearchParamsProps) => {
   const newParams = new URLSearchParams(searchParams);
 
   const perPage = pagination.pageSize;
@@ -50,14 +53,12 @@ export const updateQueryParams = ({
   return newParams;
 };
 
-export type UseSearchParams = Omit<QuerySearchParams, "searchParams">;
-
 const useSearchParamsPagination = ({
   allCols,
   pagination,
   sorting,
   columnFilters,
-}: UseSearchParams) => {
+}: UseSearchParamsProps) => {
   const router = useRouter();
   const firstRender = useRef(true);
   const searchParams = useSearchParams();

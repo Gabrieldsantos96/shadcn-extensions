@@ -4,13 +4,11 @@ import { flexRender } from "@tanstack/react-table";
 
 import { Input } from "@/components/ui/input";
 
-interface TanStackBasicTableFilterComponentProps<TData> {
+interface TableFilterProps<TData> {
   table: Table<TData>;
 }
 
-export default function TanStackBasicTableFilterComponent<TData>({
-  table,
-}: TanStackBasicTableFilterComponentProps<TData>) {
+export default function TableFilter<TData>({ table }: TableFilterProps<TData>) {
   return (
     <div>
       <h1 className="text-2xl font-bold">Filters</h1>
