@@ -158,6 +158,14 @@ export default function ExampleTable() {
 
   return (
     <div>
+      <div className="flex flex-col gap-y-2">
+        <HeaderFilters
+          headers={
+            table.getHeaderGroups()[0]?.headers as Record<string, any>[] // access to table props directly
+          }
+        />
+      </div>
+
       <RootTable
         isError={false}
         isLoading={false}
@@ -350,3 +358,219 @@ This example demonstrates accessing the full list of items in the `onSelect` cal
 ## Conclusion
 
 The `ComboSearchBox` component provides a robust solution for implementing searchable dropdowns in React. With its support for asynchronous data fetching, initial values, and flexible callbacks, it simplifies complex workflows while ensuring a smooth user experience. Use it to create efficient and user-friendly interfaces in your applications.
+
+# DialogManager: Trigger Dialogs Programmatically with Async Results
+
+## Overview
+
+The `DialogManager` provides a powerful and flexible way to display modal dialogs programmatically and retrieve their results asynchronously. This is particularly useful for confirmation dialogs, alerts, or notifications where the outcome directly affects application logic.
+
+Key features include:
+
+- **Event-Driven Architecture**: Uses a custom event manager to trigger dialogs from anywhere in the application.
+- **Async Results**: Returns a `Promise` that resolves with the user's response.
+- **Dynamic Dialogs**: Supports multiple dialog types (e.g., info, warning, error, success) with customizable content.
+- **Reusable Components**: Encapsulates dialog rendering in a listener component for ease of integration.
+
+---
+
+## Features
+
+1. **Programmatic Dialogs**:
+   - Call dialogs using `showDialog` and handle user responses asynchronously.
+2. **Dynamic Configuration**:
+   - Configure dialog type, message, and actions dynamically.
+3. **Multiple Dialog Management**:
+   - Handle multiple simultaneous dialogs with unique IDs.
+4. **Flexibility**:
+   - Customize buttons, icons, and dialog behavior based on context.
+
+---
+
+## Installation
+
+Install any required dependencies (if not already installed):
+
+```bash
+npm install react
+npm install uuid
+```
+
+---
+
+## How It Works
+
+### Core Components
+
+#### 1. `DialogListener`
+
+This component listens for dialog events and renders active dialogs dynamically.
+
+```tsx
+function DialogListener() {
+  const { handleRemoveDialog, messages } = useDialog({
+    dialogEventManager,
+  });
+
+  return (
+    <div>
+      {messages.map((message) => (
+        <DialogMessage
+          key={message.id}
+          message={message}
+          showConfirmButton={message.showConfirmButton!}
+          action={message.action!}
+          onClose={() => handleRemoveDialog(message.id)}
+          isOpen={messages.map((s) => s.id).includes(message.id) || false}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+#### 2. `DialogMessage`
+
+Responsible for rendering individual dialogs and handling user actions.
+
+```tsx
+export const DialogMessage = ({
+  message,
+  isOpen,
+  action,
+  showConfirmButton,
+  onClose,
+}: DialogMessageProps) => {
+  function handleConfirm() {
+    action(true);
+    onClose();
+  }
+
+  function handleClose() {
+    action(false);
+    onClose();
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-center gap-2">
+            {message.type === "error" && (
+              <AlertCircle className="size-8 text-red-500" />
+            )}
+            {message.type === "warning" && (
+              <AlertTriangle className="size-8 text-yellow-500" />
+            )}
+            {message.type === "info" && (
+              <InfoIcon className="size-8 text-blue-500" />
+            )}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <p>{message.message}</p>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            Close
+          </Button>
+          {!!showConfirmButton && (
+            <Button onClick={handleConfirm}>Confirm</Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+#### 3. `showDialog`
+
+A function to trigger dialogs programmatically and handle their results via a `Promise`.
+
+```tsx
+export function showDialog(props: IDialogEventProps): Promise<boolean> {
+  return new Promise((resolve) => {
+    dialogEventManager.emit("callDialogPopup", {
+      ...props,
+      id: crypto.randomUUID(),
+      action: (response: boolean) => {
+        resolve(response);
+      },
+    });
+  });
+}
+```
+
+---
+
+## Usage
+
+### Basic Example
+
+```tsx
+import { showDialog } from "./UseDialog";
+
+async function handlePopup() {
+  const res = await showDialog({
+    type: "info",
+    message: "Do you want to delete user X?",
+    showConfirmButton: true,
+  });
+
+  if (res) {
+    alert("User deleted");
+  } else {
+    alert("Action canceled");
+  }
+}
+```
+
+### Adding the Listener
+
+Ensure `DialogListener` is included in the component tree to render dialogs:
+
+```tsx
+import { DialogListener } from "./DialogPopup/DialogListener";
+
+function App() {
+  return (
+    <div>
+      {/* Your application components */}
+      <DialogListener />
+    </div>
+  );
+}
+```
+
+### Customizing Dialogs
+
+You can extend the `showDialog` function to add more customization options, such as additional buttons or dynamic content.
+
+---
+
+## API Reference
+
+### `showDialog`
+
+| Parameter           | Type                          | Description                                |
+| ------------------- | ----------------------------- | ------------------------------------------ | --------- | ---------- | -------------------------------- |
+| `type`              | `'info'                       | 'error'                                    | 'warning' | 'success'` | Type of dialog icon and styling. |
+| `message`           | `string`                      | The message to display in the dialog.      |
+| `showConfirmButton` | `boolean`                     | Whether to show a confirmation button.     |
+| `action`            | `(response: boolean) => void` | Callback invoked with the user's response. |
+
+---
+
+## Benefits
+
+1. **Asynchronous Handling**: Simplifies user interaction by allowing dialogs to return promises.
+2. **Global Accessibility**: Trigger dialogs from anywhere in your application.
+3. **Dynamic Content**: Supports highly customizable dialogs based on context.
+4. **Reusability**: Encapsulates logic and rendering for easy reuse across multiple projects.
+
+---
+
+## Conclusion
+
+The `DialogManager` offers a robust and flexible way to manage dialogs programmatically. By leveraging event-driven architecture and promises, it provides a clean and scalable solution for handling user interactions that require confirmation or additional input.
