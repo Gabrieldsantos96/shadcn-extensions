@@ -1,35 +1,10 @@
 import { useReducer } from "react";
-import { Getters } from "./useGetters";
-
-export type Event = {
-  id: string;
-  title: string;
-  description?: string;
-  startDate: Date;
-  endDate: Date;
-  minmized?: any;
-};
-
-export type ScheduleView = Getters &
-  SchedulerState & {
-    onEvent: (event?: Pick<Event, "endDate" | "startDate">) => void;
-  };
-
-export type SchedulerState = {
-  events: Event[];
-};
-
-export type SchedulerAction = {
-  type: "ADD_EVENT" | "REMOVE_EVENT" | "UPDATE_EVENT" | "SET_EVENTS";
-  payload: any;
-};
-
-export interface UseSchedulerReturn extends SchedulerState {
-  addEvent: (event: Event) => void;
-  removeEvent: (id: string) => void;
-  updateEvent: (event: Event) => void;
-  setEvents: (events: Event[]) => void;
-}
+import {
+  IEvent,
+  SchedulerAction,
+  SchedulerState,
+  UseSchedulerReturn,
+} from "./ISchedule";
 
 export const initialSchedulerState: SchedulerState = {
   events: [],
@@ -73,7 +48,7 @@ export function useSchedulerState(
     ...initialState,
   });
 
-  const addEvent = (event: Event) => {
+  const addEvent = (event: IEvent) => {
     dispatch({ type: "ADD_EVENT", payload: event });
   };
 
@@ -81,11 +56,11 @@ export function useSchedulerState(
     dispatch({ type: "REMOVE_EVENT", payload: { id } });
   };
 
-  const updateEvent = (event: Event) => {
+  const updateEvent = (event: IEvent) => {
     dispatch({ type: "UPDATE_EVENT", payload: event });
   };
 
-  const setEvents = (events: Event[]) => {
+  const setEvents = (events: IEvent[]) => {
     dispatch({ type: "SET_EVENTS", payload: events });
   };
 

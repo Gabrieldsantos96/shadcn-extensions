@@ -1,20 +1,17 @@
 import React, { useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import EventStyled from "@/components/extensions/Schedule/EventStyle";
-import { Button } from "@/components/extensions/Button";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import clsx from "clsx";
-import { Event, ScheduleView } from "../useScheduleState";
+import { Event } from "../useScheduleState";
+import { ScheduleView } from "../ISchedule";
 const hours = Array.from(
   { length: 24 },
   (_, i) => `${i.toString().padStart(2, "0")}:00`
 );
 
-export default function WeeklyView({
-  events,
-  onEvent,
-  ...getters
-}: ScheduleView) {
+function WeeklyView({ events, onEvent, ...getters }: ScheduleView) {
   const hoursColumnRef = useRef<HTMLDivElement>(null);
   const [detailedHour, setDetailedHour] = useState<string | null>(null);
   const [timelinePosition, setTimelinePosition] = useState<number>(0);

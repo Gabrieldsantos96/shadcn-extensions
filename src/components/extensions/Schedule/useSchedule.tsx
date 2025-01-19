@@ -1,13 +1,19 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetters } from "./useGetters";
-import { SchedulerState, useSchedulerState } from "./useScheduleState";
-import DailyView from "./views/Daily";
-import MonthView from "./views/Monthly";
-import WeeklyView from "./views/Week";
+import { useSchedulerState } from "./useScheduleState";
+import {
+  DailyView,
+  MonthView,
+  WeeklyView,
+} from "@/components/extensions/Schedule/Views";
+import { SchedulerState } from "./ISchedule";
+import AddEventModal, { IAddEventModalRef } from "./EventModal";
+import { useRef } from "react";
 
 export function useSchedule(initialState?: SchedulerState) {
   const { events } = useSchedulerState(initialState);
   const getters = useGetters();
+  const ref = useRef<IAddEventModalRef>(null);
 
   return {
     events,
@@ -15,6 +21,7 @@ export function useSchedule(initialState?: SchedulerState) {
     ScheduleRoot: ({ className }: { className?: string }) => {
       return (
         <>
+          <AddEventModal ref={ref} />
           <Tabs defaultValue="day" className={className}>
             <TabsList className="grid grid-cols-3 w-[400px]">
               <TabsTrigger value="day">Day</TabsTrigger>
@@ -25,21 +32,21 @@ export function useSchedule(initialState?: SchedulerState) {
               <DailyView
                 {...getters}
                 events={events}
-                onEvent={(e) => console.log(e)}
+                onEvent={(e: any) => ref.current?.toggleModal()}
               />
             </TabsContent>
             <TabsContent value="week">
               <WeeklyView
                 {...getters}
                 events={events}
-                onEvent={(e) => console.log(e)}
+                onEvent={(e: any) => ref.current?.toggleModal()}
               />
             </TabsContent>
             <TabsContent value="monthly">
               <MonthView
                 {...getters}
                 events={events}
-                onEvent={(e) => console.log(e)}
+                onEvent={(e: any) => ref.current?.toggleModal()}
               />
             </TabsContent>
           </Tabs>

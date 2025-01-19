@@ -2,22 +2,16 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button } from "../../Button";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import clsx from "clsx";
 
 import EventStyled from "../EventStyle";
-import {
-  Event,
-  ScheduleView,
-} from "@/components/extensions/Schedule/useScheduleState";
+import { Event } from "@/components/extensions/Schedule/useScheduleState";
 import { Card } from "@/components/ui/card";
+import { ScheduleView } from "../ISchedule";
 
-export default function MonthView({
-  events,
-  onEvent,
-  ...getters
-}: ScheduleView) {
+function MonthView({ events, onEvent, ...getters }: ScheduleView) {
   console.log(onEvent);
   const [currentDate, setCurrentDate] = useState(new Date());
 

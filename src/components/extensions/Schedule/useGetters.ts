@@ -1,15 +1,19 @@
-import { Event } from "./useScheduleState";
+import { IEvent } from "./ISchedule";
 
 export interface Getters {
   getDaysInMonth: (
     month: number,
     year: number
-  ) => { day: number; events: Event[] }[];
-  getEventsForDay: (day: number, currentDate: Date, events: Event[]) => Event[];
+  ) => { day: number; events: IEvent[] }[];
+  getEventsForDay: (
+    day: number,
+    currentDate: Date,
+    events: IEvent[]
+  ) => IEvent[];
   getDaysInWeek: (week: number, year: number, weekStartsOn: string) => Date[];
   getWeekNumber: (date: Date) => number;
   getDayName: (day: number) => string;
-  handleEventStyling: (event: Event, dayEvents: Event[]) => any;
+  handleEventStyling: (event: IEvent, dayEvents: IEvent[]) => any;
 }
 
 export function useGetters() {
@@ -75,7 +79,7 @@ export function useGetters() {
     },
     getDayName: (day) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day],
 
-    handleEventStyling(event: Event, dayEvents: Event[]) {
+    handleEventStyling(event: IEvent, dayEvents: IEvent[]) {
       const eventsOnHour = dayEvents.filter((e) => {
         return (
           e.startDate < event.endDate && e.endDate > event.startDate // Any overlap
